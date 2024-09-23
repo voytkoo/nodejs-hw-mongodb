@@ -9,26 +9,22 @@ import {
 } from '../services/contacts.js';
 
 export const getContactsController = async (req, res) => {
-  const data = await getAllContacts();
+  const contacts = await getAllContacts();
 
   res.status(200).json({
     status: 200,
     message: 'Successfully found contacts!',
-    data,
+    data: contacts,
   });
 };
 
-export const getContactByIdController = async (req, res, next) => {
+export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
 
   const contact = await getContactById(contactId);
 
   if (!contact) {
-    res.status(404).json({
-      status: 404,
-      message: 'Contact not found',
-    });
-    return;
+    throw createHttpError(404, 'Contact not found');
   }
   res.status(200).json({
     status: 200,
@@ -47,7 +43,7 @@ export const createContactController = async (req, res) => {
 };
 
 export const deleteContactByIdController = async (req, res) => {
-  const contactId = req.params.productId;
+  const contactId = req.params.contactId;
   const removedContact = await deleteContactById(contactId);
 
   if (!removedContact) {

@@ -5,6 +5,7 @@ import { env } from './utils/env.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import contactsRouter from './routers/contacts.js';
+
 const PORT = Number(env('PORT', '3000'));
 
 export const setupServer = () => {
@@ -12,6 +13,7 @@ export const setupServer = () => {
 
   app.use(express.json());
   app.use(cors());
+
   app.use(
     pino({
       transport: {
@@ -19,7 +21,7 @@ export const setupServer = () => {
       },
     }),
   );
-  app.use('/contacts', contactsRouter);
+  app.use(contactsRouter);
 
   app.use('*', notFoundHandler);
 
