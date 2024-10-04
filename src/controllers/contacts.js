@@ -10,24 +10,28 @@ import { validatePaginationParams } from '../utils/validatePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilter } from '../utils/parseFilter.js';
 
-export const getContactsController = (req, res) => {
-  const { page, perPage } = validatePaginationParams(req.query);
-  const { sortBy, sortOrder } = parseSortParams(req.query);
-  const filter = parseFilter(req.query);
+export const getContactsController = async (req, res, next) => {
+  try {
+    const { page, perPage } = validatePaginationParams(req.query);
+    const { sortBy, sortOrder } = parseSortParams(req.query);
+    const filter = parseFilter(req.query);
 
-  const paginatedContacts = getAllContacts({
-    page,
-    perPage,
-    sortBy,
-    sortOrder,
-    filter,
-  });
+    const paginatedContacts = await getAllContacts({
+      page,
+      perPage,
+      sortBy,
+      sortOrder,
+      filter,
+    });
 
-  res.status(200).json({
-    status: 200,
-    message: 'Successfully found contacts!',
-    data: paginatedContacts,
-  });
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: paginatedContacts,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const getContactByIdController = async (req, res, next) => {
