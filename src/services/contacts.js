@@ -12,6 +12,7 @@ export const getAllContacts = async ({
 }) => {
   const skip = (page - 1) * perPage;
   const limit = perPage;
+
   const contactQuery = ContactsCollection.find();
 
   if (filter.type) {
@@ -30,10 +31,7 @@ export const getAllContacts = async ({
     .skip(skip)
     .limit(limit)
     .sort({ [sortBy]: sortOrder })
-    .lean()
     .exec();
-
-  console.log('fetced contacts:', contacts);
 
   const paginationData = createPagination(contactsCount, perPage, page);
 
@@ -51,5 +49,21 @@ export const createContact = (contactData) =>
 export const deleteContactById = (contactId) =>
   ContactsCollection.findByIdAndDelete(contactId);
 
-export const updateContact = (id, contactData) =>
-  ContactsCollection.findByIdAndUpdate(id, contactData, { new: true });
+export const updateContact = async (id, contactData, options = {}) => {
+  const updatedContact = await ContactsCollection.findOneAndUpdate(
+    id,
+    contactData,
+    {
+      new: true,
+      includeResultMetadata: true,
+      ...options,
+    },
+  );
+
+  if (!updatedContact || !updatedContact.value) return null;
+
+  return {
+    contact: updatedContact.value,
+    isNew: Boolean(updatedContact?.lastErrorObject?.upserted),
+  };
+};
