@@ -4,8 +4,8 @@ import { SORT_ORDER } from '../constants/index.js';
 import { createPagination } from '../utils/createPagination.js';
 
 export const getAllContacts = async ({
-  page,
-  perPage,
+  page = 1,
+  perPage = 10,
   sortOrder = SORT_ORDER.ASC,
   sortBy = 'name',
   filter = {},
