@@ -1,8 +1,8 @@
 import createHttpError from 'http-errors';
-import { User } from '../db/models/user.js';
+import { User } from '../db/models/User.js';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
-import { Session } from '../db/models/session.js';
+import { Session } from '../db/models/Session.js';
 import {
   ACCESS_TOKEN_LIVE_TIME,
   REFRESH_TOKEN_LIVE_TIME,
