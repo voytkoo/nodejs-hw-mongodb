@@ -15,10 +15,6 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.10.0",
-    "@types/bcrypt": "^5.0.2",
-    "@types/cookie-parser": "^1.4.7",
-    "@types/cors": "^2.8.17",
-    "@types/http-errors": "^2.0.4",
     "eslint": "^9.10.0",
     "globals": "^15.9.0",
     "nodemon": "^3.1.4",
