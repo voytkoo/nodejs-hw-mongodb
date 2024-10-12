@@ -1,14 +1,14 @@
 import { Router } from 'express';
-import { ctrlWrapper } from '../utils/ctrlWrapper';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import {
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
   registerUserController,
-} from '../controllers/auth';
-import { validateBody } from '../middlewares/validateBody';
-import { registerUserValidationSchema } from '../validation/registerUserValidationSchema';
-import { loginUserValidationSchema } from '../validation/loginUserValidationSchema';
+} from '../controllers/auth.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import { registerUserValidationSchema } from '../validation/registerUserValidationSchema.js';
+import { loginUserValidationSchema } from '../validation/loginUserValidationSchema.js';
 
 const authRouter = Router();
 

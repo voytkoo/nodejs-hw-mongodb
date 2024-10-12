@@ -1,4 +1,4 @@
-import { REFRESH_TOKEN_LIVE_TIME } from '../constants/time';
+import { REFRESH_TOKEN_LIVE_TIME } from '../constants/time.js';
 
 export const setupSectionCookies = (session, res) => {
   res.cookie('refreshToken', session.refreshToken, {

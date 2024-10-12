@@ -44,8 +44,8 @@ export const getAllContacts = async ({
 export const getContactById = (contactId, userId) =>
   ContactsCollection.findOne({ _id: contactId, userId });
 
-export const createContact = (contactData) =>
-  ContactsCollection.create(contactData);
+export const createContact = (contactData, userId) =>
+  ContactsCollection.create({ ...contactData, userId });
 
 export const deleteContactById = (contactId, userId) =>
   ContactsCollection.findOneAndDelete({ _id: contactId, userId });

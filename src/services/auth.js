@@ -18,7 +18,7 @@ export const findUserByEmail = (email) => User.findOne({ email });
 export const findUserById = (userId) => User.findById(userId);
 
 export const createSession = async (userId) => {
-  await Session.deleteOne({ userId });
+  await Session.deleteOne({ userId: userId._id });
 
   const accessToken = crypto.randomBytes(30).toString('base64');
   const refreshToken = crypto.randomBytes(30).toString('base64');

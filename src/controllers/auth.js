@@ -5,7 +5,6 @@ import {
   deleteSession,
   findSessionById,
   findUserByEmail,
-  logoutUser,
   registerUser,
 } from '../services/auth.js';
 import { setupSectionCookies } from '../utils/setUpSessionCookies.js';
@@ -53,7 +52,7 @@ export const loginUserController = async (req, res) => {
 
 export const logoutUserController = async (req, res, next) => {
   if (req.cookies.sessionId) {
-    await logoutUser(req.cookies.sessionId);
+    await deleteSession(req.cookies.sessionId);
   }
 
   res.clearCookie('sessionId');
