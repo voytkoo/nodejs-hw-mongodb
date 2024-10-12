@@ -23,7 +23,7 @@ contactsRouter.get(
   ctrlWrapper(getContactByIdController),
 );
 contactsRouter.post(
-  '/contacts',
+  '/',
   validateBody(createContactSchemaValidation),
   ctrlWrapper(createContactController),
 );
