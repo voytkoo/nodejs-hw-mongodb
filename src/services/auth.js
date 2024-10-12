@@ -1,4 +1,3 @@
-import createHttpError from 'http-errors';
 import { User } from '../db/models/user.js';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
@@ -8,82 +7,40 @@ import {
   REFRESH_TOKEN_LIVE_TIME,
 } from '../constants/time.js';
 
-const createSession = () => ({
-  accessToken: crypto.randomBytes(30).toString('base64'),
-  refreshToken: crypto.randomBytes(30).toString('base64'),
-  accessTokenValidUntil: new Date(Date.now() + ACCESS_TOKEN_LIVE_TIME),
-  refreshTokenValidUntil: new Date(Date.now() + REFRESH_TOKEN_LIVE_TIME),
-});
-
-// const findUserByEmail = async (email) => {
-//   await User.findOne({ email });
-// };
-
 export const registerUser = async (userData) => {
-  let user = await User.findOne({ email: userData.email });
-
-  if (user) {
-    throw createHttpError(409, 'Email in use');
-  }
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-
-  user = await User.create({
+  const password = await bcrypt.hash(userData.password, 10);
+  return await User.create({
     ...userData,
-    password: hashedPassword,
+    password,
   });
+};
+export const findUserByEmail = (email) => User.findOne({ email });
+export const findUserById = (userId) => User.findById(userId);
 
-  return user;
+export const createSession = async (userId) => {
+  await Session.deleteOne({ userId });
+
+  const accessToken = crypto.randomBytes(30).toString('base64');
+  const refreshToken = crypto.randomBytes(30).toString('base64');
+  const accessTokenValidUntil = new Date(Date.now() + ACCESS_TOKEN_LIVE_TIME);
+  const refreshTokenValidUntil = new Date(Date.now() + REFRESH_TOKEN_LIVE_TIME);
+  return Session.create({
+    userId,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil,
+    refreshTokenValidUntil,
+  });
 };
 
-export const loginUser = async (userData) => {
-  const user = await User.findOne({ email: userData.email });
+export const deleteSession = (sessionId) =>
+  Session.deleteOne({ _id: sessionId });
 
-  if (!user) {
-    throw createHttpError(404, 'User not found');
-  }
-
-  const arePasswordsEqual = await bcrypt.compare(
-    userData.password,
-    user.password,
-  );
-
-  if (!arePasswordsEqual) {
-    throw createHttpError(401, 'User email or password is incorrect!');
-  }
-
-  await Session.deleteOne({ userId: user._id });
-
-  const session = await Session.create({
-    userId: user._id,
-    ...createSession(),
-  });
-  return session;
+export const findSessionById = (sessionId, refreshToken) => {
+  Session.findOne({ _id: sessionId, refreshToken });
 };
 
-export const logoutUser = async (sessionId, sessionToken) => {
-  await Session.deleteOne({ _id: sessionId, refreshToken: sessionToken });
-};
-
-export const refreshSession = async (sessionId, sessionToken) => {
-  const session = await Session.findOne({
-    _id: sessionId,
-    refreshToken: sessionToken,
+export const findSessionByToken = (token) =>
+  Session.findOne({
+    accessToken: token,
   });
-
-  if (!session) {
-    throw createHttpError(401, 'Session not found');
-  }
-  const now = new Date();
-
-  if (session.refreshTokenValidUntil < now) {
-    throw createHttpError(401, 'Refresh token expired');
-  }
-
-  await Session.deleteOne({ _id: sessionId, refreshToken: sessionToken });
-
-  const newSession = await Session.create({
-    userId: session.userId,
-    ...createSession(),
-  });
-  return newSession;
-};

@@ -1,7 +1,5 @@
 import createHttpError from 'http-errors';
-
-import { User } from '../db/models/user.js';
-import { Session } from '../db/models/session.js';
+import { findSessionByToken, findUserById } from '../services/auth.js';
 
 export const authenticate = async (req, res, next) => {
   const authHeader = req.get('Authorization');
@@ -15,16 +13,20 @@ export const authenticate = async (req, res, next) => {
     return next(createHttpError(401, 'Auth must be of type bearer!'));
   }
 
-  const session = await Session.findOne({ accessToken: token });
+  const session = await findSessionByToken(token);
   if (!session) {
     return next(
       createHttpError(401, 'Auth token is not associated with any session!'),
     );
   }
-  if (session.accessTokenValidUntil < new Date()) {
+  const isAccessTokenExpired =
+    new Date() > new Date(session.accessTokenValidUntil);
+
+  if (isAccessTokenExpired) {
     return next(createHttpError(401, 'Auth token is expired!'));
   }
-  const user = await User.findById(session.userId);
+
+  const user = findUserById(session.userId);
 
   if (!user) {
     return next(createHttpError(401, 'No user is associated with this!'));
