@@ -7,13 +7,16 @@ const parseType = (type) => {
   if (isType(type)) return type;
 };
 
-const parseIsFavourite = (value) => {
-  const isString = typeof value === 'string';
-  if (!isString) return;
+const parseIsFavourite = (isFavourite, defaultValue = undefined) => {
+  const isString = typeof isFavourite === 'string';
+  if (!isString) return defaultValue;
 
-  if (!['true', 'false'].includes(value)) return;
+  const parsedIsFavourite =
+    isFavourite === 'true' || isFavourite === 'false'
+      ? isFavourite
+      : defaultValue;
 
-  return value === 'true' ? 'true' : 'false';
+  return parsedIsFavourite;
 };
 
 export const parseFilter = (query) => {
@@ -23,7 +26,7 @@ export const parseFilter = (query) => {
   const parsedIsFavourite = parseIsFavourite(isFavourite);
 
   return {
-    contactTypeype: parsedType,
+    contactType: parsedType,
     isFavourite: parsedIsFavourite,
   };
 };

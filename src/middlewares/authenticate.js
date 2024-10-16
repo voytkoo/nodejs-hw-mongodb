@@ -1,37 +1,45 @@
 import createHttpError from 'http-errors';
-import { findSessionByToken, findUserById } from '../services/auth.js';
+import { Session } from '../db/models/session.js';
+import { User } from '../db/models/user.js';
 
 export const authenticate = async (req, res, next) => {
   const authHeader = req.get('Authorization');
 
   if (!authHeader) {
-    return next(createHttpError(401, 'Auth header is required!'));
+    next(createHttpError(401, 'Auth header is required!'));
+    return;
   }
   const [bearer, token] = authHeader.split(' ');
 
   if (bearer !== 'Bearer' || !token) {
-    return next(createHttpError(401, 'Auth must be of type bearer!'));
+    next(createHttpError(401, 'Auth must be of type bearer!'));
+    return;
   }
 
-  const session = await findSessionByToken(token);
+  const session = await Session.findOne({ accessToken: token });
+
   if (!session) {
-    return next(
+    next(
       createHttpError(401, 'Auth token is not associated with any session!'),
     );
+    return;
   }
-  const isAccessTokenExpired =
+
+  const accessTokenExpired =
     new Date() > new Date(session.accessTokenValidUntil);
 
-  if (isAccessTokenExpired) {
-    return next(createHttpError(401, 'Auth token is expired!'));
+  if (accessTokenExpired) {
+    next(createHttpError(401, 'Auth token is expired!'));
   }
 
-  const user = await findUserById(session.userId);
+  const user = await User.findById(session.userId);
 
   if (!user) {
-    return next(createHttpError(401, 'No user is associated with this!'));
+    next(createHttpError(401, 'No user is associated with this!'));
+    return;
   }
 
   req.user = user;
+
   next();
 };
