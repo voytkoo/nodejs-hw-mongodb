@@ -79,7 +79,7 @@ export const patchContactController = async (req, res, next) => {
   });
 };
 
-export const deleteContactByIdController = async (req, res, next) => {
+export const deleteContactByIdController = async (req, res) => {
   const { contactId } = req.params;
   const removedContact = await deleteContactById(contactId, req.user._id);
 
