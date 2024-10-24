@@ -11,4 +11,4 @@ const sessionsSchema = new Schema(
   { versionKey: false },
 );
 
-export const Session = model('Session', sessionsSchema);
+export const Session = model('sessions', sessionsSchema);

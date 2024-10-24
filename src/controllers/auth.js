@@ -4,6 +4,8 @@ import {
   refreshUserSession,
   loginUser,
   registerUser,
+  sendResetToken,
+  resetPassword,
 } from '../services/auth.js';
 import { ACCESS_TOKEN_LIVE_TIME } from '../constants/time.js';
 
@@ -90,4 +92,23 @@ export const logoutUserController = async (req, res) => {
   res.clearCookie('refreshToken');
 
   res.status(204).send();
+};
+
+export const sendResetTokenController = async (req, res) => {
+  await sendResetToken(req.body.email);
+
+  res.json({
+    message: 'Reset password email has been successfully sent.',
+    status: 200,
+    data: {},
+  });
+};
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+
+  res.json({
+    message: 'Password has been successfully reset.',
+    status: 200,
+    data: {},
+  });
 };

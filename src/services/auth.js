@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { User } from '../db/models/user.js';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
@@ -7,6 +8,11 @@ import {
   REFRESH_TOKEN_LIVE_TIME,
 } from '../constants/time.js';
 import createHttpError from 'http-errors';
+import jwt from 'jsonwebtoken';
+import { env } from '../utils/env.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import { SMTP } from '../constants/index.js';
+import { generateResetPassword } from '../utils/generateResetPassword.js';
 
 export const registerUser = async (userData) => {
   const user = await User.findOne({ email: userData.email });
@@ -85,4 +91,59 @@ export const refreshUserSession = async ({ sessionId, refreshToken }) => {
 
 export const logoutUser = async (sessionId) => {
   await Session.deleteOne({ _id: sessionId });
+};
+
+export const sendResetToken = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env('JWT_SECRET'),
+    {
+      expiresIn: 60 * 5,
+    },
+  );
+
+  const resetLink = `${env('APP_DOMAIN')}/reset-password?token=${resetToken}`;
+
+  try {
+    await sendEmail({
+      from: env(SMTP.SMTP_FROM),
+      to: email,
+      subject: 'Reset your password',
+      html: generateResetPassword({
+        name: user.name,
+        resetLink: resetLink,
+      }),
+    });
+  } catch {
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
+};
+export const resetPassword = async (payload) => {
+  let entries;
+  try {
+    entries = jwt.verify(payload.token, env('JWT_SECRET'));
+  } catch (err) {
+    if (err instanceof Error)
+      throw createHttpError(401, 'Token is expired or invalid.');
+    throw err;
+  }
+  const user = await User.findById(payload.sub);
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
+
+  await User.findByIdAndUpdate(user._id, { password: hashedPassword });
 };
