@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { User } from '../db/models/user.js';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
@@ -138,12 +137,15 @@ export const resetPassword = async (payload) => {
       throw createHttpError(401, 'Token is expired or invalid.');
     throw err;
   }
-  const user = await User.findById(payload.sub);
+  const user = await User.findOne({
+    email: entries.email,
+    _id: entries.sub,
+  });
 
   if (!user) {
     throw createHttpError(404, 'User not found!');
   }
   const hashedPassword = await bcrypt.hash(payload.password, 10);
 
-  await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+  await User.updateOne({ _id: user._id }, { password: hashedPassword });
 };

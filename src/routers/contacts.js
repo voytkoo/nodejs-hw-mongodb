@@ -25,6 +25,11 @@ contactsRouter.get(
   ctrlWrapper(getContactByIdController),
 );
 contactsRouter.post(
+  '/contacts',
+  validateBody(createContactSchemaValidation),
+  ctrlWrapper(createContactController),
+);
+contactsRouter.post(
   '/',
   upload.single('photo'),
   validateBody(createContactSchemaValidation),
